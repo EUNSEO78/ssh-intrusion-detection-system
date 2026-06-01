@@ -4,6 +4,7 @@ import re
 file_path = "/var/log/auth.log"
 search_string = "Failed password for"
 failed_attempts = {}
+threshold = 5
 
 with open(file_path, "r") as file:
     for line in file:
@@ -23,6 +24,11 @@ with open(file_path, "r") as file:
                 else:
                     failed_attempts[ip] += 1
                 print("Failed Attempts List:", failed_attempts)
+    
+    # 임계치 초과 시 경고 메시지 출력
+    for ip, count in failed_attempts.items():
+        if count >= threshold:
+            print(f"🔴Warning: {ip} has {count} failed Login Attacks!🔴")
             
 
 
