@@ -1,3 +1,4 @@
+from datetime import datetime
 import subprocess
 import re
 
@@ -18,11 +19,18 @@ def block_ip(ip):
     try:
         subprocess.run(["sudo", "ufw", "deny", "from", ip], check=True)
         print(f"Blocked IP: {ip}")
+        return True
     except subprocess.CalledProcessError as e:
         print(f"Error blocking IP {ip}: {e}")
+        return False
+
+# 차단된 IP를 파일(blocked_ips.txt)에 저장
+def save_blocked_ip(ip, count):
+    with open("blocked_ips.txt", "a") as file:
+        file.write(f"⚪{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} / {ip} / {count}\n")
+        print(f"⚪{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} / {ip} / {count} \n")
+
        
-
-
 with open(file_path, "r") as file:
     for line in file:
         if search_string in line:
@@ -50,6 +58,8 @@ with open(file_path, "r") as file:
 
         if count >= threshold:
             print(f"🔴Warning: {ip} has {count} failed Login Attacks!🔴")
-            block_ip(ip)
+        
+            if block_ip(ip):
+                save_blocked_ip(ip, count)
 
 
