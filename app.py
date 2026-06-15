@@ -71,7 +71,7 @@ for line in follow_log(file_path):
                     failed_attempts[ip] = 1
                 else:
                     failed_attempts[ip] += 1
-                # WHITELIST 에 없고, 실패한 로그인 시도가 threshold 이상인 IP 주소를 차단하는 로직 구현
+                # WHITELIST 에 없고, 실패한 로그인 시도가 threshold 이상인 IP 주소를 차단
                 if ip not in WHITELIST and failed_attempts[ip] >= threshold:
                     print(f"🔴Warning: {ip} has {failed_attempts[ip]} failed Login Attacks!🔴")
                     if block_ip(ip):
