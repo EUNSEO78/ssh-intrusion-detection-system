@@ -1,3 +1,5 @@
+print("SSH Defense Started", flush=True) # 시작 알림
+
 from datetime import datetime
 import subprocess
 import re
@@ -24,7 +26,7 @@ ip_regex = r"\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b"
 # IP 차단 로직 구현 (UFW 자동 차단)
 def block_ip(ip):
     try:
-        subprocess.run(["sudo", "ufw", "deny", "from", ip], check=True, capture_output=True)
+        subprocess.run([ "ufw", "deny", "from", ip], check=True, capture_output=True)
         print(f"Blocked IP: {ip}")
         return True
     except subprocess.CalledProcessError as e:
