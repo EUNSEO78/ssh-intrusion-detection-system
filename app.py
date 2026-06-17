@@ -1,12 +1,20 @@
 print("SSH Defense Started", flush=True) # 시작 알림
 
+import os
+from dotenv import load_dotenv
+load_dotenv()  # .env 파일에서 환경 변수 로드
+
 from datetime import datetime
 import subprocess
 import re
 import time
 
+import requests
 
 
+
+
+WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
 file_path = "/var/log/auth.log"
 search_string = "Failed password for"
 failed_attempts = {}
@@ -20,6 +28,16 @@ WHITELIST = [
 
 # IP 주소 추출을 위한 정규표현식 패턴
 ip_regex = r"\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b"
+
+
+# Discord Webhook으로 메시지 전송하는 로직 구현
+def send_discord_message(ip, count):
+    message = f"🚨 SSH Attack Detected 🚨\n\nIP: {ip}\nFailed Attempts: {count}\nTime: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\nAction: UFW Blocked"
+    try:
+        requests.post(WEBHOOK_URL, json={"content": message})
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending message to Discord: {e}")
+
 
 
 
@@ -79,6 +97,7 @@ for line in follow_log(file_path):
                     if block_ip(ip):
                         blocked_ips.add(ip)
                         save_blocked_ip(ip, failed_attempts[ip])
+                        send_discord_message(ip, failed_attempts[ip])
 
 
 
