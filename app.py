@@ -10,6 +10,8 @@ import re
 import time
 
 import requests
+import threading
+
 
 
 
@@ -20,6 +22,7 @@ search_string = "Failed password for"
 failed_attempts = {}
 threshold = 5
 blocked_ips = set()
+BLOCK_TIME = 300  # 차단 시간 (초)
 
 WHITELIST = [
     "127.0.0.1",      # localhost
@@ -38,6 +41,12 @@ def send_discord_message(ip, count):
     except requests.exceptions.RequestException as e:
         print(f"Error sending message to Discord: {e}")
 
+def send_discord_unblock_message(ip):
+    message = f"✅ SSH Attack Unblocked ✅\n\nIP: {ip}\nTime: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\nAction: UFW Unblocked"
+    try:
+        requests.post(WEBHOOK_URL, json={"content": message})
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending unblock message to Discord: {e}")
 
 
 
@@ -50,6 +59,23 @@ def block_ip(ip):
     except subprocess.CalledProcessError as e:
         print(f"Error blocking IP {ip}: {e}")
         return False
+
+
+# IP 차단 해제 로직 구현 (UFW 자동 차단 해제)    
+def unblock_ip(ip):
+    try: 
+        subprocess.run(["ufw", "delete", "deny", "from", ip], check=True, capture_output=True)
+        print(f"Unblocked IP: {ip}")
+        send_discord_unblock_message(ip)
+        if ip in blocked_ips:
+            blocked_ips.remove(ip)
+            print(f"Removed {ip} from blocked_ips")
+        if ip in failed_attempts:
+            del failed_attempts[ip]
+            print(f"Removed {ip} from failed_attempts")
+    except subprocess.CalledProcessError as e:
+        print(f"Error unblocking IP {ip}: {e}")
+    
 
 # 차단된 IP를 파일(blocked_ips.txt)에 저장하는 로직 구현
 def save_blocked_ip(ip, count):
@@ -98,6 +124,11 @@ for line in follow_log(file_path):
                         blocked_ips.add(ip)
                         save_blocked_ip(ip, failed_attempts[ip])
                         send_discord_message(ip, failed_attempts[ip])
+
+                        # 차단된 IP를 일정 시간 후에 자동으로 차단 해제
+                        threading.Timer(BLOCK_TIME, unblock_ip, args=[ip]).start()
+
+
 
 
 
