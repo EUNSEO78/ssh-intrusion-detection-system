@@ -22,7 +22,8 @@ search_string = "Failed password for"
 failed_attempts = {}
 threshold = 5
 blocked_ips = set()
-BLOCK_TIME = 300  # 차단 시간 (초)
+BLOCK_TIME = 300  # 차단 시간 (초) -> 5분
+WINDOW_TIME = 600  # 로그인 시도 카운트 초기화 시간 (초) -> 10분
 
 WHITELIST = [
     "127.0.0.1",      # localhost
@@ -84,6 +85,8 @@ def save_blocked_ip(ip, count):
         file.write(log_message)
         print(log_message.strip())
 
+
+
 # 로그 파일을 실시간으로 모니터링하는 제너레이터 함수 구현
 def follow_log(filename):
     with open(filename, "r", encoding="utf-8") as file:
@@ -112,18 +115,23 @@ for line in follow_log(file_path):
                     print(f"⚪IP {ip} is already blocked⚪")
                     continue
                 print("Failed IP Address:", ip)
+
+                current_time = time.time() # 현재 시간 기록
                 # 실패한 IP 주소를 딕셔너리에 저장, 횟수 카운트
                 if ip not in failed_attempts:
-                    failed_attempts[ip] = 1
-                else:
-                    failed_attempts[ip] += 1
-                # WHITELIST 에 없고, 실패한 로그인 시도가 threshold 이상인 IP 주소를 차단
-                if ip not in WHITELIST and failed_attempts[ip] >= threshold:
-                    print(f"🔴Warning: {ip} has {failed_attempts[ip]} failed Login Attacks!🔴")
+                    failed_attempts[ip] = []
+                
+                failed_attempts[ip].append(current_time)
+                # WINDOW_TIME 초 이내의 시도만 유지
+                failed_attempts[ip] = [t for t in failed_attempts[ip] if current_time - t <= WINDOW_TIME] 
+
+                # WHITELIST 에 없고, WINDOW_TIME 이내에 실패한 로그인 시도가 threshold 이상인 IP 주소를 차단
+                if ip not in WHITELIST and len(failed_attempts[ip]) >= threshold:
+                    print(f"🔴Warning: {ip} has {len(failed_attempts[ip])} failed Login Attacks!🔴")
                     if block_ip(ip):
                         blocked_ips.add(ip)
-                        save_blocked_ip(ip, failed_attempts[ip])
-                        send_discord_message(ip, failed_attempts[ip])
+                        save_blocked_ip(ip, len(failed_attempts[ip]))
+                        send_discord_message(ip, len(failed_attempts[ip]))
 
                         # 차단된 IP를 일정 시간 후에 자동으로 차단 해제
                         threading.Timer(BLOCK_TIME, unblock_ip, args=[ip]).start()
