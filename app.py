@@ -22,8 +22,8 @@ search_string = "Failed password for"
 failed_attempts = {}
 threshold = 5
 blocked_ips = set()
-BLOCK_TIME = 300  # 차단 시간 (초) -> 5분
-WINDOW_TIME = 600  # 로그인 시도 카운트 초기화 시간 (초) -> 10분
+BLOCK_TIME = 60  # 차단 시간 (초) -> 5분(300) # 테스트 -> 1분(60초)
+WINDOW_TIME = 60  # 로그인 시도 카운트 초기화 시간 (초) -> 10분(600) # 테스트 -> 1분(60초)
 
 WHITELIST = [
     "127.0.0.1",      # localhost
