@@ -45,7 +45,7 @@ def send_discord_message(ip, count):
 def send_discord_unblock_message(ip):
     message = f"✅ SSH Attack Unblocked ✅\n\nIP: {ip}\nTime: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\nAction: UFW Unblocked"
     try:
-        requests.post(WEBHOOK_URL, json={"content": message})
+       requests.post(WEBHOOK_URL, json={"content": message})
     except requests.exceptions.RequestException as e:
         print(f"Error sending unblock message to Discord: {e}")
 
