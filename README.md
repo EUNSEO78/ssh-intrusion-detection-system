@@ -27,7 +27,7 @@
 
 ## 🏗️ Architecture
 
-![Architecture](architecture-image.png)
+![Architecture](images/architecture-image.png)
 
 ---
 
@@ -56,7 +56,13 @@ ssh-intrusion-detection-system/
 ├── requirements.txt
 ├── ssh-defense.service
 ├── README.md
-└── venv/
+└── images/
+    ├── architecture-image.png
+    ├── auto-unblock.png
+    ├── brute-force-detection.png
+    ├── discord-notification.png
+    └── ufw-block.png
+
 ```
 
 ---
@@ -146,19 +152,19 @@ sudo journalctl -u ssh-defense -f
 
 ### Brute Force Detection
 
-![Brute Force Detection](brute-force-detection.png)
+![Brute Force Detection](images/brute-force-detection.png)
 
 ### UFW Auto Blocking
 
-![UFW Auto Blocking](ufw-block.png)
+![UFW Auto Blocking](images/ufw-block.png)
 
 ### Discord Notification
 
-![Discord Notification](discord-notification.png)
+![Discord Notification](images/discord-notification.png)
 
 ### Auto Unblocking
 
-![Auto Unblocking](auto-unblock.png)
+![Auto Unblocking](images/auto-unblock.png)
 
 ---
 
