@@ -1,0 +1,12 @@
+[Unit]
+Description=SSH Defense System
+After=network.target
+
+[Service]
+WorkingDirectory=/home/secuser/ssh-defense-system
+ExecStart=/home/secuser/ssh-defense-system/venv/bin/python3 -u /home/secuser/ssh-defense-system/app.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
